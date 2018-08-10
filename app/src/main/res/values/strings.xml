@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Cine Gallery</string>
+    <string name="popular">Most Popular</string>
+    <string name="high_rate">Highest Rated</string>
+    <string name="highly_movies">Highest Rated Movies</string>
+    <string name="popular_movies">Most Popular Movies</string>
+    <string name="recent_movies">Recently Released Movies</string>
+    <string name="coming_soon">Coming Soon</string>
+    <string name="poster">Movie Poster</string>
+
+</resources>
