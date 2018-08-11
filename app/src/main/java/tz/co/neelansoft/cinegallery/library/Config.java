@@ -2,7 +2,7 @@ package tz.co.neelansoft.cinegallery.library;
 
 public class Config {
 
-    private static final String API_KEY = "1c0dca08c46cffb77fe39c5428ae7d1f";
+    private static final String API_KEY = "";
     private static final String BASE_URL = "https://api.themoviedb.org/3";
     private static final String DEFAULT_SORT = "popularity.desc";
     private static final String DEFAULT_QUERY = "/discover/movie?page=1&include_video=false&include_adult=false&language=en-US";
