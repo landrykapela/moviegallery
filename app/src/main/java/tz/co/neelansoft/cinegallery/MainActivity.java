@@ -1,5 +1,6 @@
 package tz.co.neelansoft.cinegallery;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -33,15 +34,16 @@ import tz.co.neelansoft.cinegallery.library.Movie;
 import static tz.co.neelansoft.cinegallery.library.Config.DEFAULT_REQUEST_URL;
 import static tz.co.neelansoft.cinegallery.library.Config.POSTER_BASE_URL;
 import static tz.co.neelansoft.cinegallery.library.Config.POSTER_SIZE_DEFAULT;
+import static tz.co.neelansoft.cinegallery.library.Config.POSTER_SIZE_WIDE;
 import static tz.co.neelansoft.cinegallery.library.Config.STANDARD_REQUEST_URL;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements CustomGridAdapter.OnImageClickListener{
     private static final String TAG = "MainActivity";
 
-    private static CustomGridAdapter mGridAdapter;
-    private static GridView mGridView;
-    private static ProgressBar mProgressBar;
-    private static TextView mGridHeading;
+    private CustomGridAdapter mGridAdapter;
+    private GridView mGridView;
+    private ProgressBar mProgressBar;
+    private TextView mGridHeading;
 
 
     @Override
@@ -55,9 +57,20 @@ public class MainActivity extends AppCompatActivity{
         mProgressBar = findViewById(R.id.progressBar);
         mGridHeading = findViewById(R.id.tv_grid_heading);
 
-        mGridAdapter = new CustomGridAdapter(this);
+        mGridAdapter = new CustomGridAdapter(this,this);
 
         new DataLoader().execute(DEFAULT_REQUEST_URL);
+    }
+    @Override
+    public void onImageClick(int itemPosition){
+        Movie selectedMovie = mGridAdapter.getItem(itemPosition);
+        showDetails(selectedMovie);
+    }
+
+    private void showDetails(Movie m){
+        Intent details_intent = new Intent(this,DetailsActivity.class);
+        details_intent.putExtra("movie",m);
+        startActivity(details_intent);
     }
 
     @Override
@@ -79,6 +92,9 @@ public class MainActivity extends AppCompatActivity{
             case R.id.action_coming:
                 mGridHeading.setText(getResources().getString(R.string.coming_soon));
                 break;
+            case R.id.action_cinema:
+                mGridHeading.setText(getResources().getString(R.string.theatre_movies));
+                break;
             default:
                 mGridHeading.setText(getResources().getString(R.string.popular_movies));
 
@@ -96,9 +112,20 @@ public class MainActivity extends AppCompatActivity{
             case R.id.action_rate:
                 stringBuilder.append("&sort_by=vote_average.desc");
                 break;
-            case R.id.action_coming:
+            case R.id.action_cinema:
                 String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-                stringBuilder.append("&release_date.gte=").append(today);
+                String y = today.split("-")[0];
+                String m = today.split("-")[1];
+                String d = today.split("-")[2];
+                String last_month = String.valueOf(Integer.parseInt(m)-1);
+                String last_month_date = y + "-" + last_month + "-" + d;
+                stringBuilder.append("&primary_release_date.gte=").append(last_month_date).append("&primary_release_date.lte=").append(today);
+                Log.e(TAG,stringBuilder.toString());
+                break;
+            case R.id.action_coming:
+                String date_today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                stringBuilder.append("&primary_release_date.gte=").append(date_today);
+                Log.e(TAG,stringBuilder.toString());
                 break;
             default:
                 stringBuilder.append("&sort_by=popularity.desc");
@@ -129,8 +156,16 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+    private void showProgress(){
+        mProgressBar.setVisibility(View.VISIBLE);
 
-    static class DataLoader extends AsyncTask<String,Void,String> {
+    }
+    private void hideProgress(){
+        mProgressBar.setVisibility(View.GONE);
+
+    }
+
+    class DataLoader extends AsyncTask<String,Void,String> {
         final List<Movie> movies = new ArrayList<>();
     @Override
     protected String doInBackground(String... arg){
@@ -144,20 +179,30 @@ public class MainActivity extends AppCompatActivity{
                     JSONObject jo = new JSONObject(json);
                     JSONArray results = jo.getJSONArray("results");
                     if(results != null){
+                        Log.e(TAG,"size: "+results.length());
                         for(int i=0; i<results.length();i++){
-                            if(i < 20){
+
                                 JSONObject json_movie = results.getJSONObject(i);
                                 int id = Integer.parseInt(json_movie.getString("id"));
                                 String title = json_movie.getString("title");
                                 String release_date = json_movie.getString("release_date");
-                                String poster_url = new StringBuilder(POSTER_BASE_URL).append(POSTER_SIZE_DEFAULT).append(json_movie.getString("poster_path")).toString();
+                                String poster_url = POSTER_BASE_URL + POSTER_SIZE_DEFAULT + json_movie.getString("poster_path");
                                 int votes = Integer.parseInt(json_movie.getString("vote_count"));
                                 float vote_average = Float.parseFloat(json_movie.getString("vote_average"));
                                 float popularity = Float.parseFloat(json_movie.getString("popularity"));
                                 String overview = json_movie.getString("overview");
                                 Movie movie = new Movie(id, title, release_date, poster_url,votes,vote_average,popularity, overview);
+                                boolean isAdult = Boolean.getBoolean(json_movie.getString("adult"));
+                                if(json_movie.getString("backdrop_path")!= null) {
+                                    movie.setBackdrop(POSTER_BASE_URL+POSTER_SIZE_WIDE+json_movie.getString("backdrop_path"));
+                                }
+                                else {
+                                    movie.setBackdrop(POSTER_BASE_URL+POSTER_SIZE_WIDE+json_movie.getString("poster_path"));
+                                    Log.e(TAG,"Poster: "+json_movie.getString("poster_path"));
+                                }
+                                movie.setAdult(isAdult);
                                 movies.add(movie);
-                            }
+
                         }
                     }
                 }
@@ -171,6 +216,7 @@ public class MainActivity extends AppCompatActivity{
             }
             catch (IOException e){
                 Log.e(TAG,"Error in handling request",e);
+                return null;
             }
         }
         catch (MalformedURLException e){
@@ -198,13 +244,6 @@ public class MainActivity extends AppCompatActivity{
         mGridView.setAdapter(mGridAdapter);
 
     }
-    private void showProgress(){
-        mProgressBar.setVisibility(View.VISIBLE);
 
-    }
-    private void hideProgress(){
-        mProgressBar.setVisibility(View.GONE);
-
-    }
 }
 }

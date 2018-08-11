@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:cardCornerRadius="@dimen/cardview_default_radius"
-    app:cardElevation="@dimen/cardview_default_elevation"
-    android:layout_margin="@dimen/standard_margin"
+    android:layout_margin="@dimen/small_margin"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
-        android:orientation="vertical"
+    <android.support.constraint.ConstraintLayout
+        android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
     <ImageView
@@ -22,12 +21,42 @@
         android:layout_marginTop="@dimen/no_margin"
         app:srcCompat="@android:drawable/sym_def_app_icon" />
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/standard_margin"
-        android:gravity="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption" />
-    </LinearLayout>
-</android.support.v7.widget.CardView>
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/standard_margin"
+            android:gravity="center"
+            android:textColor="@color/primaryTextColor"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/iv_poster"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
+            android:id="@+id/iv_badge"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="@dimen/small_margin"
+            android:layout_marginTop="260dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/rating_badge"
+            app:layout_constraintStart_toStartOf="@+id/iv_poster"
+            app:layout_constraintTop_toTopOf="@+id/iv_poster"
+            app:srcCompat="@mipmap/ic_badge" />
+
+        <TextView
+            android:id="@+id/tv_vote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="270dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption"
+            app:layout_constraintEnd_toEndOf="@+id/iv_badge"
+            app:layout_constraintStart_toStartOf="@+id/iv_badge"
+            app:layout_constraintTop_toTopOf="@+id/iv_poster" />
+    </android.support.constraint.ConstraintLayout>
+
+</LinearLayout>
