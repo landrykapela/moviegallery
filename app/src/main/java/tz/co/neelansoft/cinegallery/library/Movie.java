@@ -10,9 +10,14 @@ public class Movie implements Parcelable{
     private String release_date;
     private String poster_url;
     private String synopsis;
+    private String original_title;
+
+
+    private String original_language;
     private int vote_count;
     private float vote_average;
     private float popularity;
+    private boolean isAdult;
 
     public String getBackdrop() {
         return backdrop;
@@ -32,7 +37,6 @@ public class Movie implements Parcelable{
         isAdult = adult;
     }
 
-    private boolean isAdult;
 
 
     //no argument constructor
@@ -52,6 +56,21 @@ public class Movie implements Parcelable{
 
     }
 
+    public String getOriginalTitle() {
+        return original_title;
+    }
+
+    public void setOriginalTitle(String original_title) {
+        this.original_title = original_title;
+    }
+
+    public String getOriginalLanguage() {
+        return original_language;
+    }
+
+    public void setOriginalLanguage(String original_language) {
+        this.original_language = original_language;
+    }
 
     public String getSynopsis() {
         return synopsis;
@@ -131,10 +150,13 @@ public class Movie implements Parcelable{
         dest.writeFloat(vote_average);
         dest.writeFloat(popularity);
         dest.writeString(title);
+        dest.writeString(original_title);
+        dest.writeString(original_language);
         dest.writeString(release_date);
         dest.writeString(synopsis);
         dest.writeString(poster_url);
         dest.writeString(backdrop);
+        dest.writeByte((byte) (isAdult ? 1: 0));
 
     }
     //private constructor with parcel argument
@@ -144,10 +166,13 @@ public class Movie implements Parcelable{
         this.vote_average = parcel.readFloat();
         this.popularity = parcel.readFloat();
         this.title = parcel.readString();
+        this.original_title = parcel.readString();
+        this.original_language = parcel.readString();
         this.release_date = parcel.readString();
         this.synopsis = parcel.readString();
         this.poster_url = parcel.readString();
         this.backdrop = parcel.readString();
+        this.isAdult = parcel.readByte() != 0;
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>(){

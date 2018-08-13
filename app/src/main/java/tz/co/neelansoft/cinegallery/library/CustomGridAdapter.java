@@ -23,9 +23,9 @@ public class CustomGridAdapter extends BaseAdapter {
 
     private List<Movie> movieList;
     private final Context context;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
 
-    private OnImageClickListener mImageClickListener;
+    private final OnImageClickListener mImageClickListener;
     //public constructor
     public CustomGridAdapter(Context context, OnImageClickListener listener){
         this.context = context;
@@ -67,15 +67,15 @@ public class CustomGridAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = convertView;
-        if(view == null){
-            view = inflater.inflate(R.layout.grid_item,parent,false);
+
+        if(convertView == null){
+            convertView = inflater.inflate(R.layout.grid_item,parent,false);
         }
 
         Movie movie = getItem(position);
-        ImageView poster = view.findViewById(R.id.iv_poster);
-        TextView title = view.findViewById(R.id.tv_title);
-        TextView vote = view.findViewById(R.id.tv_vote);
+        ImageView poster = convertView.findViewById(R.id.iv_poster);
+        TextView title = convertView.findViewById(R.id.tv_title);
+        TextView vote = convertView.findViewById(R.id.tv_vote);
 
         vote.setText(String.valueOf(movie.getVoteAverage()));
 
@@ -104,7 +104,7 @@ public class CustomGridAdapter extends BaseAdapter {
                 Toast.makeText(context,"movie id: "+selectedMovie.getId(),Toast.LENGTH_LONG).show();
             }
         });*/
-        return view;
+        return convertView;
     }
 
 }

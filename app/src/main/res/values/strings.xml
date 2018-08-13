@@ -12,5 +12,74 @@
     <string name="overview_label">Overview</string>
     <string name="rating_badge">Rating Badge</string>
     <string name="movie_detail">Movie Details</string>
+    <string name="language_label">Original Language</string>
+    <string name="title_label">Original Title</string>
+    <string name="release_label">Official Release Date</string>
+    <string name="reload_content">Reload content button</string>
+
+    <string-array name="language">
+        <item>Afrikaans</item>
+        <item>Arabic</item>
+        <item>Armenian</item>
+        <item>Chinese</item>
+        <item>Czech</item>
+        <item>Danish</item>
+        <item>Dutch</item>
+        <item>English</item>
+        <item>Esperanto</item>
+        <item>Finnish</item>
+        <item>French</item>
+        <item>Georgian</item>
+        <item>German</item>
+        <item>Greek</item>
+        <item>Italian</item>
+        <item>Japanese</item>
+        <item>Korean</item>
+        <item>Malay</item>
+        <item>Kurdish</item>
+        <item>Persian</item>
+        <item>Polish</item>
+        <item>Portuguese</item>
+        <item>Romanian</item>
+        <item>Russian</item>
+        <item>Spanish</item>
+        <item>Swahili</item>
+        <item>Swedish</item>
+        <item>Tagalog</item>
+        <item>Turkish</item>
+        <item>Urdu</item>
+    </string-array>
+    <string-array name="lang_codes">
+        <item>af</item>
+        <item>ar</item>
+        <item>hy</item>
+        <item>zh</item>
+        <item>cs</item>
+        <item>da</item>
+        <item>nl</item>
+        <item>en</item>
+        <item>eo</item>
+        <item>fi</item>
+        <item>fr</item>
+        <item>ka</item>
+        <item>de</item>
+        <item>el</item>
+        <item>it</item>
+        <item>ja</item>
+        <item>ko</item>
+        <item>ms</item>
+        <item>ku</item>
+        <item>fa</item>
+        <item>pl</item>
+        <item>pt</item>
+        <item>ro</item>
+        <item>ru</item>
+        <item>es</item>
+        <item>sw</item>
+        <item>sv</item>
+        <item>tl</item>
+        <item>tr</item>
+        <item>ur</item>
+    </string-array>
 
 </resources>

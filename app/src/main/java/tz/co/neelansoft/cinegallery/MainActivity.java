@@ -1,6 +1,7 @@
 package tz.co.neelansoft.cinegallery;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -26,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 import tz.co.neelansoft.cinegallery.library.CustomGridAdapter;
@@ -40,10 +43,15 @@ import static tz.co.neelansoft.cinegallery.library.Config.STANDARD_REQUEST_URL;
 public class MainActivity extends AppCompatActivity implements CustomGridAdapter.OnImageClickListener{
     private static final String TAG = "MainActivity";
 
-    private CustomGridAdapter mGridAdapter;
-    private GridView mGridView;
-    private ProgressBar mProgressBar;
+    private static CustomGridAdapter mGridAdapter;
+    private static GridView mGridView;
+    private static ProgressBar mProgressBar;
     private TextView mGridHeading;
+    private static ImageView mImageReload;
+    private static int mColumnCount = 2;
+    private static List<Movie> mMovies = new ArrayList<>();
+    private static boolean success = true;
+    private static String mUrlToFetch;
 
 
     @Override
@@ -51,15 +59,53 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
         mGridView = findViewById(R.id.gridview);
 
         mProgressBar = findViewById(R.id.progressBar);
         mGridHeading = findViewById(R.id.tv_grid_heading);
+        mImageReload = findViewById(R.id.iv_reload);
+
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) mColumnCount = 3;
 
         mGridAdapter = new CustomGridAdapter(this,this);
+        if(savedInstanceState != null){
+            mMovies = savedInstanceState.getParcelableArrayList("movies");
 
-        new DataLoader().execute(DEFAULT_REQUEST_URL);
+            mGridAdapter.setMovieList(mMovies);
+            mGridView.setNumColumns(mColumnCount);
+            mGridView.setVerticalSpacing(10);
+            mGridView.setHorizontalSpacing(10);
+            mGridView.setAdapter(mGridAdapter);
+            mGridAdapter.notifyDataSetChanged();
+        }
+        else{
+
+            new DataLoader().execute(DEFAULT_REQUEST_URL);
+
+        }
+Log.e(TAG,"It loaded: "+mMovies.size());
+
+        mImageReload.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                Log.e(TAG,"fetch url: "+mUrlToFetch);
+                reload(mUrlToFetch);
+            }
+        });
+
+    }
+
+    private void reload(String url){
+        new DataLoader().execute(url);
+        mImageReload.setVisibility(View.GONE);
+        mGridAdapter.notifyDataSetChanged();
+    }
+    @Override
+    public void onSaveInstanceState(Bundle out_bundle){
+
+        mMovies = mGridAdapter.getMovies();
+        out_bundle.putParcelableArrayList("movies",(ArrayList<Movie>)mMovies);
+        super.onSaveInstanceState(out_bundle);
     }
     @Override
     public void onImageClick(int itemPosition){
@@ -113,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
                 stringBuilder.append("&sort_by=vote_average.desc");
                 break;
             case R.id.action_cinema:
-                String today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
                 String y = today.split("-")[0];
                 String m = today.split("-")[1];
                 String d = today.split("-")[2];
@@ -123,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
                 Log.e(TAG,stringBuilder.toString());
                 break;
             case R.id.action_coming:
-                String date_today = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+                String date_today = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(new Date());
                 stringBuilder.append("&primary_release_date.gte=").append(date_today);
                 Log.e(TAG,stringBuilder.toString());
                 break;
@@ -132,9 +178,9 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
                 break;
         }
         new DataLoader().execute(stringBuilder.toString());
-        synchronized (mGridAdapter) {
-            mGridAdapter.notifyAll();
-        }
+
+            mGridAdapter.notifyDataSetChanged();
+
     }
     private static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -156,30 +202,33 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         }
     }
 
-    private void showProgress(){
+    private static void showProgress(){
         mProgressBar.setVisibility(View.VISIBLE);
 
     }
-    private void hideProgress(){
+    private static void hideProgress(){
         mProgressBar.setVisibility(View.GONE);
 
     }
 
-    class DataLoader extends AsyncTask<String,Void,String> {
+    static class DataLoader extends AsyncTask<String,Void,String> {
         final List<Movie> movies = new ArrayList<>();
+        String url_string = "";
     @Override
     protected String doInBackground(String... arg){
-        String url_string = arg[0];
+        url_string = arg[0];
+
+        mUrlToFetch = url_string;
         try{
             URL url = new URL(url_string);
             try {
                 String json = getResponseFromHttpUrl(url);
-                Log.e(TAG,"JSON: "+json);
+                Log.d(TAG,"JSON: "+json);
                 try{
                     JSONObject jo = new JSONObject(json);
                     JSONArray results = jo.getJSONArray("results");
                     if(results != null){
-                        Log.e(TAG,"size: "+results.length());
+
                         for(int i=0; i<results.length();i++){
 
                                 JSONObject json_movie = results.getJSONObject(i);
@@ -191,36 +240,48 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
                                 float vote_average = Float.parseFloat(json_movie.getString("vote_average"));
                                 float popularity = Float.parseFloat(json_movie.getString("popularity"));
                                 String overview = json_movie.getString("overview");
+                                String original_title = json_movie.getString("original_title");
+                                String original_lang = json_movie.getString("original_language");
+
+
                                 Movie movie = new Movie(id, title, release_date, poster_url,votes,vote_average,popularity, overview);
-                                boolean isAdult = Boolean.getBoolean(json_movie.getString("adult"));
+                                movie.setOriginalLanguage(original_lang);
+                                movie.setOriginalTitle(original_title);
+
+                                boolean isAdult = json_movie.getBoolean("adult");
+
                                 if(json_movie.getString("backdrop_path")!= null) {
                                     movie.setBackdrop(POSTER_BASE_URL+POSTER_SIZE_WIDE+json_movie.getString("backdrop_path"));
                                 }
                                 else {
                                     movie.setBackdrop(POSTER_BASE_URL+POSTER_SIZE_WIDE+json_movie.getString("poster_path"));
-                                    Log.e(TAG,"Poster: "+json_movie.getString("poster_path"));
                                 }
                                 movie.setAdult(isAdult);
                                 movies.add(movie);
 
                         }
+                        success = true;
+                        mMovies = movies;
                     }
                 }
                 catch (JSONException je){
                     je.printStackTrace();
                     Log.e(TAG,"Bad JSON",je);
+                    success = false;
                     return null;
                 }
 
 
             }
             catch (IOException e){
-                Log.e(TAG,"Error in handling request",e);
+                Log.e(TAG,"Error in handling request url:"+url_string,e);
+                success = false;
                 return null;
             }
         }
         catch (MalformedURLException e){
-            Log.e(TAG,"Error in url",e);
+            Log.e(TAG,"Error in url "+url_string,e);
+            success = false;
             return null;
         }
         return null;
@@ -237,11 +298,18 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         super.onPostExecute(s);
         hideProgress();
 
-        mGridAdapter.setMovieList(movies);
-        mGridView.setNumColumns(2);
-        mGridView.setVerticalSpacing(10);
-        mGridView.setHorizontalSpacing(10);
-        mGridView.setAdapter(mGridAdapter);
+        if(success) {
+            mGridAdapter.setMovieList(movies);
+            mGridView.setNumColumns(mColumnCount);
+            mGridView.setVerticalSpacing(10);
+            mGridView.setHorizontalSpacing(10);
+            mGridView.setAdapter(mGridAdapter);
+            mGridAdapter.notifyDataSetChanged();
+            mImageReload.setVisibility(View.GONE);
+        }
+        else{
+            mImageReload.setVisibility(View.VISIBLE);
+        }
 
     }
 

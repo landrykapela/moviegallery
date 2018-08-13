@@ -9,17 +9,15 @@
         android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/iv_poster"
-        android:scaleType="centerCrop"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:contentDescription="@string/poster"
-        android:layout_marginEnd="@dimen/no_margin"
-        android:layout_marginStart="@dimen/no_margin"
-        android:layout_marginTop="@dimen/no_margin"
-        app:srcCompat="@drawable/no_poster" />
+
+        <ImageView
+            android:id="@+id/iv_poster"
+            android:layout_width="match_parent"
+            android:layout_height="420dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/poster"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/no_poster" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -36,10 +34,10 @@
 
         <ImageView
             android:id="@+id/iv_badge"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/small_margin"
-            android:layout_marginTop="260dp"
+            android:layout_marginTop="400dp"
             android:layout_weight="1"
             android:contentDescription="@string/rating_badge"
             app:layout_constraintStart_toStartOf="@+id/iv_poster"
@@ -52,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_marginStart="4dp"
-            android:layout_marginTop="270dp"
+            android:layout_marginTop="415dp"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Caption"
             app:layout_constraintEnd_toEndOf="@+id/iv_badge"
             app:layout_constraintStart_toStartOf="@+id/iv_badge"

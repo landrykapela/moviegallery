@@ -9,17 +9,15 @@
         android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-    <ImageView
-        android:id="@+id/iv_poster"
-        android:scaleType="centerCrop"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="280dp"
-        android:contentDescription="@string/poster"
-        android:layout_marginEnd="@dimen/no_margin"
-        android:layout_marginStart="@dimen/no_margin"
-        android:layout_marginTop="@dimen/no_margin"
-        app:srcCompat="@drawable/no_poster" />
+
+        <ImageView
+            android:id="@+id/iv_poster"
+            android:layout_width="match_parent"
+            android:layout_height="360dp"
+            android:layout_weight="1"
+            android:contentDescription="@string/poster"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/no_poster"  />
 
         <TextView
             android:id="@+id/tv_title"
