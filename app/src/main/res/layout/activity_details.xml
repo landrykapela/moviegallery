@@ -18,8 +18,7 @@
             android:contentDescription="@string/poster"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/no_poster"  />
+            app:layout_constraintTop_toTopOf="parent"  />
 
         <ImageView
             android:id="@+id/iv_badge"

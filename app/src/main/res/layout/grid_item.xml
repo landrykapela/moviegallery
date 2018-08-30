@@ -18,8 +18,7 @@
         android:contentDescription="@string/poster"
         android:layout_marginEnd="@dimen/no_margin"
         android:layout_marginStart="@dimen/no_margin"
-        android:layout_marginTop="@dimen/no_margin"
-        app:srcCompat="@drawable/no_poster" />
+        android:layout_marginTop="@dimen/no_margin"/>
 
         <TextView
             android:id="@+id/tv_title"

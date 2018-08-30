@@ -16,6 +16,7 @@
     <string name="title_label">Original Title</string>
     <string name="release_label">Official Release Date</string>
     <string name="reload_content">Reload content button</string>
+    <string name="tmdb_attribution">TMDB logo for attribution</string>
 
     <string-array name="language">
         <item>Afrikaans</item>

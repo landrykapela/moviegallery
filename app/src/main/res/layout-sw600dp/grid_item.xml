@@ -16,8 +16,7 @@
             android:layout_height="420dp"
             android:layout_weight="1"
             android:contentDescription="@string/poster"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/no_poster" />
+            android:scaleType="centerCrop" />
 
         <TextView
             android:id="@+id/tv_title"
