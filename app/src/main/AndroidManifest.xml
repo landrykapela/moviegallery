@@ -11,10 +11,10 @@
         android:theme="@style/AppTheme"
         android:fullBackupContent="@xml/backup_descriptor">
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity" android:launchMode="singleInstance">
 
         </activity>
-        <activity android:name=".SplashActivity">
+        <activity android:name=".SplashActivity" android:theme="@style/AppTheme.Fullscreen" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

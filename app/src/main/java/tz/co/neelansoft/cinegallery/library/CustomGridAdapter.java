@@ -22,6 +22,7 @@ import tz.co.neelansoft.cinegallery.R;
 public class CustomGridAdapter extends BaseAdapter {
 
     private List<Movie> movieList;
+    private String heading;
     private final Context context;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
 
@@ -30,6 +31,7 @@ public class CustomGridAdapter extends BaseAdapter {
     public CustomGridAdapter(Context context, OnImageClickListener listener){
         this.context = context;
         this.mImageClickListener = listener;
+        this.heading = context.getResources().getString(R.string.popular_movies);
     }
 
     public interface OnImageClickListener{
@@ -63,6 +65,12 @@ public class CustomGridAdapter extends BaseAdapter {
     }
     private void loadImage(String url, ImageView imageView){
         Picasso.with(context).load(url).into(imageView);
+    }
+    public String getHeading(){
+        return this.heading;
+    }
+    public void setHeading(String heading){
+        this.heading = heading;
     }
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {

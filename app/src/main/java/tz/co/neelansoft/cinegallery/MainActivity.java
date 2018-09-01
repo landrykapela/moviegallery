@@ -66,11 +66,12 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         mImageReload = findViewById(R.id.iv_reload);
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) mColumnCount = 3;
+        else mColumnCount = 2;
 
         mGridAdapter = new CustomGridAdapter(this,this);
         if(savedInstanceState != null){
             mMovies = savedInstanceState.getParcelableArrayList("movies");
-
+            mGridHeading.setText(savedInstanceState.getString("heading"));
             mGridAdapter.setMovieList(mMovies);
             mGridView.setNumColumns(mColumnCount);
             mGridView.setVerticalSpacing(10);
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         }
         else{
 
-            new DataLoader().execute(DEFAULT_REQUEST_URL);
+            new MoviesAsyncTask().execute(DEFAULT_REQUEST_URL);
 
         }
 Log.e(TAG,"It loaded: "+mMovies.size());
@@ -96,7 +97,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
     }
 
     private void reload(String url){
-        new DataLoader().execute(url);
+        new MoviesAsyncTask().execute(url);
         mImageReload.setVisibility(View.GONE);
         mGridAdapter.notifyDataSetChanged();
     }
@@ -105,6 +106,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
 
         mMovies = mGridAdapter.getMovies();
         out_bundle.putParcelableArrayList("movies",(ArrayList<Movie>)mMovies);
+        out_bundle.putString("heading",mGridHeading.getText().toString());
         super.onSaveInstanceState(out_bundle);
     }
     @Override
@@ -128,35 +130,21 @@ Log.e(TAG,"It loaded: "+mMovies.size());
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem){
         int selectedItem = menuItem.getItemId();
+        StringBuilder stringBuilder = new StringBuilder(STANDARD_REQUEST_URL);
+        String heading;
         switch (selectedItem){
             case R.id.action_popular:
-                mGridHeading.setText(getResources().getString(R.string.popular_movies));
-                break;
-            case R.id.action_rate:
-                mGridHeading.setText(getResources().getString(R.string.highly_movies));
-                break;
-            case R.id.action_coming:
-                mGridHeading.setText(getResources().getString(R.string.coming_soon));
-                break;
-            case R.id.action_cinema:
-                mGridHeading.setText(getResources().getString(R.string.theatre_movies));
-                break;
-            default:
-                mGridHeading.setText(getResources().getString(R.string.popular_movies));
-
-        }
-        loadData(selectedItem);
-        return super.onOptionsItemSelected(menuItem);
-    }
-
-    private void loadData(int filter){
-        StringBuilder stringBuilder = new StringBuilder(STANDARD_REQUEST_URL);
-        switch (filter) {
-            case R.id.action_popular:
                 stringBuilder.append("&sort_by=popularity.desc");
+                heading = getResources().getString(R.string.popular_movies);
                 break;
             case R.id.action_rate:
                 stringBuilder.append("&sort_by=vote_average.desc");
+                heading = getResources().getString(R.string.highly_movies);
+                break;
+            case R.id.action_coming:
+                String date_today = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(new Date());
+                stringBuilder.append("&primary_release_date.gte=").append(date_today);
+                heading = getResources().getString(R.string.coming_soon);
                 break;
             case R.id.action_cinema:
                 String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -166,22 +154,21 @@ Log.e(TAG,"It loaded: "+mMovies.size());
                 String last_month = String.valueOf(Integer.parseInt(m)-1);
                 String last_month_date = y + "-" + last_month + "-" + d;
                 stringBuilder.append("&primary_release_date.gte=").append(last_month_date).append("&primary_release_date.lte=").append(today);
-                Log.e(TAG,stringBuilder.toString());
-                break;
-            case R.id.action_coming:
-                String date_today = new SimpleDateFormat("yyyy-MM-dd",Locale.getDefault()).format(new Date());
-                stringBuilder.append("&primary_release_date.gte=").append(date_today);
-                Log.e(TAG,stringBuilder.toString());
+                heading = getResources().getString(R.string.theatre_movies);
                 break;
             default:
                 stringBuilder.append("&sort_by=popularity.desc");
+                heading = getResources().getString(R.string.popular_movies);
                 break;
         }
-        new DataLoader().execute(stringBuilder.toString());
-
-            mGridAdapter.notifyDataSetChanged();
-
+        new MoviesAsyncTask().execute(stringBuilder.toString());
+        mGridAdapter.setHeading(heading);
+        mGridAdapter.notifyDataSetChanged();
+        mGridHeading.setText(heading);
+        return super.onOptionsItemSelected(menuItem);
     }
+
+
     private static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
@@ -211,7 +198,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
 
     }
 
-    static class DataLoader extends AsyncTask<String,Void,String> {
+    static class MoviesAsyncTask extends AsyncTask<String,Void,String> {
         final List<Movie> movies = new ArrayList<>();
         String url_string = "";
     @Override
@@ -299,6 +286,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         hideProgress();
 
         if(success) {
+
             mGridAdapter.setMovieList(movies);
             mGridView.setNumColumns(mColumnCount);
             mGridView.setVerticalSpacing(10);
