@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) mColumnCount = 3;
         else mColumnCount = 2;
 
-        mGridAdapter = new CustomGridAdapter(this,this);
+        mGridAdapter = new CustomGridAdapter(this);
         if(savedInstanceState != null){
             mMovies = savedInstanceState.getParcelableArrayList("movies");
             mGridHeading.setText(savedInstanceState.getString("heading"));
@@ -82,6 +82,9 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         else{
 
             new MoviesAsyncTask().execute(DEFAULT_REQUEST_URL);
+            if(success){
+                updateUI(mMovies);
+            }
 
         }
 Log.e(TAG,"It loaded: "+mMovies.size());
@@ -162,7 +165,6 @@ Log.e(TAG,"It loaded: "+mMovies.size());
                 break;
         }
         new MoviesAsyncTask().execute(stringBuilder.toString());
-        mGridAdapter.setHeading(heading);
         mGridAdapter.notifyDataSetChanged();
         mGridHeading.setText(heading);
         return super.onOptionsItemSelected(menuItem);
@@ -198,6 +200,15 @@ Log.e(TAG,"It loaded: "+mMovies.size());
 
     }
 
+    private static void updateUI(List<Movie> movies){
+        mGridAdapter.setMovieList(movies);
+        mGridView.setNumColumns(mColumnCount);
+        mGridView.setVerticalSpacing(10);
+        mGridView.setHorizontalSpacing(10);
+        mGridView.setAdapter(mGridAdapter);
+        mGridAdapter.notifyDataSetChanged();
+        mImageReload.setVisibility(View.GONE);
+    }
     static class MoviesAsyncTask extends AsyncTask<String,Void,String> {
         final List<Movie> movies = new ArrayList<>();
         String url_string = "";
@@ -287,13 +298,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
 
         if(success) {
 
-            mGridAdapter.setMovieList(movies);
-            mGridView.setNumColumns(mColumnCount);
-            mGridView.setVerticalSpacing(10);
-            mGridView.setHorizontalSpacing(10);
-            mGridView.setAdapter(mGridAdapter);
-            mGridAdapter.notifyDataSetChanged();
-            mImageReload.setVisibility(View.GONE);
+            updateUI(movies);
         }
         else{
             mImageReload.setVisibility(View.VISIBLE);

@@ -22,16 +22,13 @@ import tz.co.neelansoft.cinegallery.R;
 public class CustomGridAdapter extends BaseAdapter {
 
     private List<Movie> movieList;
-    private String heading;
-    private final Context context;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
 
     private final OnImageClickListener mImageClickListener;
     //public constructor
-    public CustomGridAdapter(Context context, OnImageClickListener listener){
-        this.context = context;
+    public CustomGridAdapter(OnImageClickListener listener){
+
         this.mImageClickListener = listener;
-        this.heading = context.getResources().getString(R.string.popular_movies);
     }
 
     public interface OnImageClickListener{
@@ -63,17 +60,13 @@ public class CustomGridAdapter extends BaseAdapter {
     public void setMovieList(List<Movie> list){
         this.movieList = list;
     }
-    private void loadImage(String url, ImageView imageView){
+    private void loadImage(Context context,String url, ImageView imageView){
         Picasso.with(context).load(url).into(imageView);
     }
-    public String getHeading(){
-        return this.heading;
-    }
-    public void setHeading(String heading){
-        this.heading = heading;
-    }
+
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if(convertView == null){
@@ -95,7 +88,7 @@ public class CustomGridAdapter extends BaseAdapter {
 
         title.setText(year);
 //        vote.setText(String.valueOf(movie.getVoteAverage()));
-        loadImage(movie.getPosterUrl(),poster);
+        loadImage(context,movie.getPosterUrl(),poster);
 
         GridView gridView = parent.findViewById(R.id.gridview);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

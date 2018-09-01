@@ -31,27 +31,32 @@ public class DetailsActivity extends AppCompatActivity {
         RatingBar mRatingBar = findViewById(R.id.ratingBar);
 
         Intent intent = getIntent();
-        if(intent.getExtras().getParcelable("movie") != null){
-            Movie movie = intent.getExtras().getParcelable("movie");
-            if(movie.getBackdrop() != null || !movie.getBackdrop().contains("null")) Picasso.with(this).load(movie.getBackdrop()).into(mImagePoster);
+        Bundle extras = intent.getExtras();
+        Movie myMovie = (extras != null) ? (Movie) extras.getParcelable("movie") : null;
+            if( myMovie != null){
 
-            mRatingBar.setRating(movie.getVoteAverage()/2);
-            mTextTitle.setText(movie.getTitle());
-            mTextOverview.setText(movie.getSynopsis());
+                String movieBackdrop = myMovie.getBackdrop();
+                if( movieBackdrop != null && !movieBackdrop.contains("null")) Picasso.with(this).load(myMovie.getBackdrop()).into(mImagePoster);
+                else mImagePoster.setImageResource(R.drawable.tmdb);
 
-            mTextOfficialReleaseDate.setText(movie.getReleaseDate());
-            mTextOriginalLanguage.setText(Config.getLanguage(this,movie.getOriginalLanguage()));
-            mTextOriginalTitle.setText(movie.getOriginalTitle());
+                    mRatingBar.setRating(myMovie.getVoteAverage()/2);
+                    mTextTitle.setText(myMovie.getTitle());
+                    mTextOverview.setText(myMovie.getSynopsis());
+
+                    mTextOfficialReleaseDate.setText(myMovie.getReleaseDate());
+                    mTextOriginalLanguage.setText(Config.getLanguage(this,myMovie.getOriginalLanguage()));
+                    mTextOriginalTitle.setText(myMovie.getOriginalTitle());
 
 
-            int badge;
-            if(movie.isAdult()){
-                badge = R.mipmap.age_badge;
+                    int badge;
+                    if(myMovie.isAdult()){
+                        badge = R.mipmap.age_badge;
+                    }
+                    else {
+                        badge = R.mipmap.age_badge_pg;
+                    }
+                mImageBadge.setImageResource(badge);
             }
-            else {
-                badge = R.mipmap.age_badge_pg;
-            }
-            mImageBadge.setImageResource(badge);
-        }
+
     }
 }
