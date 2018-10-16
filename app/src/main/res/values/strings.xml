@@ -19,7 +19,9 @@
     <string name="tmdb_attribution">TMDB logo for attribution</string>
     <string name="favorite">Favorites</string>
     <string name="add_favorite">Add to Favorites</string>
-    
+    <string name="read_review">Read Reviews</string>
+    <string name="review">Reviews</string>
+
 
     <string-array name="language">
         <item>Afrikaans</item>

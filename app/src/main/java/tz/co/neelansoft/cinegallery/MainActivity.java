@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 import tz.co.neelansoft.cinegallery.library.CustomGridAdapter;
+import tz.co.neelansoft.cinegallery.library.JSONParser;
 import tz.co.neelansoft.cinegallery.library.Movie;
 import tz.co.neelansoft.cinegallery.library.MovieDatabase;
 import tz.co.neelansoft.cinegallery.library.MovieExecutors;
@@ -192,25 +193,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
             }
         });
     }
-    private static String getResponseFromHttpUrl(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
 
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A");
-
-            boolean hasInput = scanner.hasNext();
-            String response = null;
-            if (hasInput) {
-                response = scanner.next();
-            }
-            scanner.close();
-            return response;
-        } finally {
-            urlConnection.disconnect();
-        }
-    }
 
     private static void showProgress(){
         mProgressBar.setVisibility(View.VISIBLE);
@@ -241,7 +224,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         try{
             URL url = new URL(url_string);
             try {
-                String json = getResponseFromHttpUrl(url);
+                String json = new JSONParser().getResponseFromHttpUrl(url);
                 Log.d(TAG,"JSON: "+json);
                 try{
                     JSONObject jo = new JSONObject(json);

@@ -3,9 +3,12 @@ package tz.co.neelansoft.cinegallery;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -14,10 +17,25 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import tz.co.neelansoft.cinegallery.library.Config;
+import tz.co.neelansoft.cinegallery.library.JSONParser;
 import tz.co.neelansoft.cinegallery.library.Movie;
 import tz.co.neelansoft.cinegallery.library.MovieDatabase;
 import tz.co.neelansoft.cinegallery.library.MovieExecutors;
+import tz.co.neelansoft.cinegallery.library.Review;
+import tz.co.neelansoft.cinegallery.library.ReviewsAdapter;
+
+import static tz.co.neelansoft.cinegallery.library.Config.API_QUERY;
 
 public class DetailsActivity extends AppCompatActivity {
     private static final String TAG = "DetailsActivity";
@@ -31,8 +49,13 @@ public class DetailsActivity extends AppCompatActivity {
     private TextView mTextOfficialReleaseDate;
     private RatingBar mRatingBar;
 
+    private RecyclerView mRecyclerViewReviews;
+    private ReviewsAdapter mReviewsAdapter;
+    List<Review> mReviews = new ArrayList<>();
+
     private MovieDatabase mDatabase;
     private boolean isFavorite;
+    private int movieId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -50,13 +73,20 @@ public class DetailsActivity extends AppCompatActivity {
         mTextOfficialReleaseDate = findViewById(R.id.tv_release_date);
         mRatingBar = findViewById(R.id.ratingBar);
 
+        mRecyclerViewReviews = findViewById(R.id.rv_review);
+
+        mReviewsAdapter = new ReviewsAdapter(this,mReviews);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        mRecyclerViewReviews.setHasFixedSize(true);
+        mRecyclerViewReviews.setLayoutManager(layoutManager);
+
         mDatabase = MovieDatabase.getDatabaseInstance(this);
 
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         final Movie myMovie = (extras != null) ? (Movie) extras.getParcelable("movie") : null;
             if( myMovie != null){
-
+                movieId = myMovie.getId();
                 String movieBackdrop = myMovie.getBackdrop();
                 if( movieBackdrop != null && !movieBackdrop.contains("null")) Picasso.with(this).load(myMovie.getBackdrop()).into(mImagePoster);
                 else mImagePoster.setImageResource(R.drawable.tmdb);
@@ -117,6 +147,8 @@ public class DetailsActivity extends AppCompatActivity {
                    Log.e(TAG,"Movie id:"+myMovie.getId());
                 }
             });
+
+            getMovieReviews(Config.MOVIE_URL+movieId+"/reviews"+API_QUERY);
     }
     private void makeFavorite(final Movie movie, final boolean flag){
         MovieExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -131,4 +163,59 @@ public class DetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void getMovieReviews(String link){
+        new MovieDetails().execute(link);
+    }
+
+    public class MovieDetails extends AsyncTask<String,Void,String>{
+        @Override
+        protected String doInBackground(String... args){
+            String url_string = args[0];
+            try{
+                URL url = new URL(url_string);
+                try {
+                    String json = new JSONParser().getResponseFromHttpUrl(url);
+                    Log.e(TAG,"result: "+json);
+                    try{
+                        JSONObject jo_review = new JSONObject(json);
+                            JSONArray ja = jo_review.getJSONArray("results");
+                        if(ja != null){
+                            for(int i=0;i< ja.length();i++){
+                                JSONObject jo = ja.getJSONObject(i);
+                                String author = jo.getString("author");
+                                String content = jo.getString("content");
+
+                                Review r = new Review(author,content);
+                                mReviews.add(r);
+                            }
+                        }
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+                        Log.e(TAG,"error in json object",e);
+                        return null;
+                    }
+                    return json;
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                    Log.e(TAG,"Could not retreive json",e);
+                    return null;
+                }
+            }
+            catch(MalformedURLException e){
+                e.printStackTrace();
+                Log.e(TAG,"URL error");
+                return null;
+            }
+        }
+        @Override
+        protected void onPostExecute(String result){
+            super.onPostExecute(result);
+            mReviewsAdapter.setReviewList(mReviews);
+            mRecyclerViewReviews.setAdapter(mReviewsAdapter);
+            mReviewsAdapter.notifyDataSetChanged();
+        }
+    };
 }
