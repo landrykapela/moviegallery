@@ -161,5 +161,21 @@
             app:layout_constraintStart_toEndOf="@+id/tv_label_release"
             app:layout_constraintTop_toTopOf="@+id/tv_label_release"
             app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
+            android:id="@+id/iv_favorite"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            app:srcCompat="@mipmap/ic_favorite_clear"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:contentDescription="@string/add_favorite"
+            app:layout_constraintBottom_toBottomOf="@+id/ratingBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/ratingBar"
+            app:layout_constraintTop_toTopOf="@+id/ratingBar" />
     </android.support.constraint.ConstraintLayout>
 </ScrollView>

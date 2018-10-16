@@ -1,23 +1,28 @@
 package tz.co.neelansoft.cinegallery.library;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.OnConflictStrategy;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
-
+@Entity(tableName = "movie")
 public class Movie implements Parcelable{
 
+    @PrimaryKey
     private int id;
     private String title;
-    private String release_date;
-    private String poster_url;
+    private String releaseDate;
+    private String posterUrl;
     private String synopsis;
-    private String original_title;
+    private String originalTitle;
 
 
-    private String original_language;
-    private int vote_count;
-    private float vote_average;
+    private String originalLanguage;
+    private int voteCount;
+    private float voteAverage;
     private float popularity;
     private boolean isAdult;
+
 
     public String getBackdrop() {
         return backdrop;
@@ -44,32 +49,32 @@ public class Movie implements Parcelable{
 
     }
     //public constructor
-    public Movie(int id, String title, String release_date, String poster_url,int votes,float vote_average,float popularity, String synopsis){
+    public Movie(int id, String title, String releaseDate, String posterUrl,int votes,float voteAverage,float popularity, String synopsis){
         this.id = id;
         this.title = title;
-        this.release_date = release_date;
-        this.poster_url = poster_url;
-        this.vote_count = votes;
-        this.vote_average = vote_average;
+        this.releaseDate = releaseDate;
+        this.posterUrl = posterUrl;
+        this.voteCount = votes;
+        this.voteAverage = voteAverage;
         this.popularity = popularity;
         this.synopsis = synopsis;
 
     }
 
     public String getOriginalTitle() {
-        return original_title;
+        return originalTitle;
     }
 
-    public void setOriginalTitle(String original_title) {
-        this.original_title = original_title;
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
     }
 
     public String getOriginalLanguage() {
-        return original_language;
+        return originalLanguage;
     }
 
-    public void setOriginalLanguage(String original_language) {
-        this.original_language = original_language;
+    public void setOriginalLanguage(String originalLanguage) {
+        this.originalLanguage = originalLanguage;
     }
 
     public String getSynopsis() {
@@ -81,19 +86,19 @@ public class Movie implements Parcelable{
     }
 
     public int getVoteCount() {
-        return vote_count;
+        return voteCount;
     }
 
-    public void setVoteCount(int vote_count) {
-        this.vote_count = vote_count;
+    public void setVoteCount(int voteCount) {
+        this.voteCount = voteCount;
     }
 
     public float getVoteAverage() {
-        return vote_average;
+        return voteAverage;
     }
 
-    public void setVoteAverage(float vote_average) {
-        this.vote_average = vote_average;
+    public void setVoteAverage(float voteAverage) {
+        this.voteAverage = voteAverage;
     }
 
     public float getPopularity() {
@@ -106,11 +111,11 @@ public class Movie implements Parcelable{
 
 
     public String getPosterUrl() {
-        return poster_url;
+        return posterUrl;
     }
 
-    public void setPosterUrl(String poster_url) {
-        this.poster_url = poster_url;
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
     }
 
     public int getId() {
@@ -131,11 +136,11 @@ public class Movie implements Parcelable{
     }
 
     public String getReleaseDate() {
-        return release_date;
+        return releaseDate;
     }
 
-    public void setReleaseDate(String release_date) {
-        this.release_date = release_date;
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
     }
 
     @Override
@@ -146,15 +151,15 @@ public class Movie implements Parcelable{
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(id);
-        dest.writeInt(vote_count);
-        dest.writeFloat(vote_average);
+        dest.writeInt(voteCount);
+        dest.writeFloat(voteAverage);
         dest.writeFloat(popularity);
         dest.writeString(title);
-        dest.writeString(original_title);
-        dest.writeString(original_language);
-        dest.writeString(release_date);
+        dest.writeString(originalTitle);
+        dest.writeString(originalLanguage);
+        dest.writeString(releaseDate);
         dest.writeString(synopsis);
-        dest.writeString(poster_url);
+        dest.writeString(posterUrl);
         dest.writeString(backdrop);
         dest.writeByte((byte) (isAdult ? 1: 0));
 
@@ -162,15 +167,15 @@ public class Movie implements Parcelable{
     //private constructor with parcel argument
     private Movie(Parcel parcel){
         this.id = parcel.readInt();
-        this.vote_count = parcel.readInt();
-        this.vote_average = parcel.readFloat();
+        this.voteCount = parcel.readInt();
+        this.voteAverage = parcel.readFloat();
         this.popularity = parcel.readFloat();
         this.title = parcel.readString();
-        this.original_title = parcel.readString();
-        this.original_language = parcel.readString();
-        this.release_date = parcel.readString();
+        this.originalTitle = parcel.readString();
+        this.originalLanguage = parcel.readString();
+        this.releaseDate = parcel.readString();
         this.synopsis = parcel.readString();
-        this.poster_url = parcel.readString();
+        this.posterUrl = parcel.readString();
         this.backdrop = parcel.readString();
         this.isAdult = parcel.readByte() != 0;
     }

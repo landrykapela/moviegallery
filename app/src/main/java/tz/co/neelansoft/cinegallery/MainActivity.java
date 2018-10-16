@@ -1,9 +1,12 @@
 package tz.co.neelansoft.cinegallery;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +36,8 @@ import java.util.Scanner;
 
 import tz.co.neelansoft.cinegallery.library.CustomGridAdapter;
 import tz.co.neelansoft.cinegallery.library.Movie;
+import tz.co.neelansoft.cinegallery.library.MovieDatabase;
+import tz.co.neelansoft.cinegallery.library.MovieExecutors;
 
 import static tz.co.neelansoft.cinegallery.library.Config.DEFAULT_REQUEST_URL;
 import static tz.co.neelansoft.cinegallery.library.Config.POSTER_BASE_URL;
@@ -53,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
     private static boolean success = true;
     private static String mUrlToFetch;
 
+    private MovieDatabase mMovieDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -64,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         mProgressBar = findViewById(R.id.progressBar);
         mGridHeading = findViewById(R.id.tv_grid_heading);
         mImageReload = findViewById(R.id.iv_reload);
+
+        mMovieDatabase = MovieDatabase.getDatabaseInstance(this);
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) mColumnCount = 3;
         else mColumnCount = 2;
@@ -134,8 +142,11 @@ Log.e(TAG,"It loaded: "+mMovies.size());
     public boolean onOptionsItemSelected(MenuItem menuItem){
         int selectedItem = menuItem.getItemId();
         StringBuilder stringBuilder = new StringBuilder(STANDARD_REQUEST_URL);
-        String heading;
+        String heading = "";
         switch (selectedItem){
+            case R.id.action_favorite:
+                getFavorites();
+                return true;
             case R.id.action_popular:
                 stringBuilder.append("&sort_by=popularity.desc");
                 heading = getResources().getString(R.string.popular_movies);
@@ -170,7 +181,17 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         return super.onOptionsItemSelected(menuItem);
     }
 
-
+    private void getFavorites(){
+        LiveData<List<Movie>> favoriteMovies = mMovieDatabase.movieDao().getFavoriteMovies();
+        favoriteMovies.observe(MainActivity.this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                mGridAdapter.setMovieList(movies);
+                mGridAdapter.notifyDataSetChanged();
+                mGridHeading.setText(R.string.favorite);
+            }
+        });
+    }
     private static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
