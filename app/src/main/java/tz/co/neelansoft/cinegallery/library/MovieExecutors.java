@@ -35,12 +35,6 @@ public class MovieExecutors {
     public Executor diskIO(){
         return diskIO;
     }
-    public Executor networkIO(){
-        return networkIO;
-    }
-    public Executor mainThread(){
-        return mainThread;
-    }
 
     private static class MainThreadExecutor implements Executor{
 

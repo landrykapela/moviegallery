@@ -19,12 +19,13 @@
     <string name="tmdb_attribution">TMDB logo for attribution</string>
     <string name="favorite">Favorites</string>
     <string name="add_favorite">Add to Favorites</string>
-    <string name="read_review">Read Reviews</string>
     <string name="review">Reviews</string>
     <string name="trailer">Trailers</string>
     <string name="open_with">Open With</string>
     <string name="no_review">No Reviews</string>
     <string name="no_trailer">No Trailer</string>
+    <string name="trailer_play">play trailer</string>
+    <string name="no_data">Nothing to display</string>
 
 
     <string-array name="language">

@@ -14,7 +14,7 @@ import tz.co.neelansoft.cinegallery.R;
 
 public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ViewHolder> {
 
-    private Context mContext;
+    private final Context mContext;
     private List<Review> mReviewList;
     public ReviewsAdapter(Context context, List<Review> reviews){
         this.mContext = context;
@@ -23,9 +23,7 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ViewHold
     public void setReviewList(List<Review> list){
         this.mReviewList = list;
     }
-    public List<Review> getReviews(){
-        return mReviewList;
-    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -44,16 +42,16 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
-        private TextView mTextAuthor;
-        private TextView mTextContent;
-        public ViewHolder(View itemView) {
+        private final TextView mTextAuthor;
+        private final TextView mTextContent;
+        ViewHolder(View itemView) {
             super(itemView);
 
             mTextAuthor = itemView.findViewById(R.id.tv_author);
             mTextContent = itemView.findViewById(R.id.tv_content);
         }
 
-        public void bind(int position){
+        void bind(int position){
             Review review = mReviewList.get(position);
             mTextContent.setText(review.getContent());
             mTextAuthor.setText("- ".concat(review.getAuthor()));

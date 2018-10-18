@@ -4,8 +4,7 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.drm.DrmStore;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -52,24 +50,16 @@ import static tz.co.neelansoft.cinegallery.library.Config.YOUTUBE_BASE_URL;
 
 public class DetailsActivity extends AppCompatActivity implements TrailersAdapter.OnTrailerClickListener{
     private static final String TAG = "DetailsActivity";
-    private ImageView mImageBadge;
-    private ImageView mImagePoster;
     private ImageView mImageFavorite;
-    private TextView mTextOverview;
-    private TextView mTextTitle;
-    private TextView mTextOriginalLanguage;
-    private TextView mTextOriginalTitle;
-    private TextView mTextOfficialReleaseDate;
     private TextView mTextNoReview;
     private TextView mTextNoTrailer;
-    private RatingBar mRatingBar;
 
     private RecyclerView mRecyclerViewReviews;
     private ReviewsAdapter mReviewsAdapter;
     private RecyclerView mRecyclerViewTrailers;
     private TrailersAdapter mTrailersAdapter;
-    List<Review> mReviews = new ArrayList<>();
-    List<Trailer> mTrailers = new ArrayList<>();
+    private final List<Review> mReviews = new ArrayList<>();
+    private final List<Trailer> mTrailers = new ArrayList<>();
 
     private MovieDatabase mDatabase;
     private boolean isFavorite;
@@ -81,17 +71,17 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
 
         setContentView(R.layout.activity_details);
 
-        mImageBadge = findViewById(R.id.iv_badge);
-        mImagePoster = findViewById(R.id.iv_backdrop);
+        ImageView mImageBadge = findViewById(R.id.iv_badge);
+        ImageView mImagePoster = findViewById(R.id.iv_backdrop);
         mImageFavorite = findViewById(R.id.iv_favorite);
-        mTextOverview = findViewById(R.id.tv_overview);
-        mTextTitle = findViewById(R.id.tv_title);
-        mTextOriginalLanguage = findViewById(R.id.tv_original_language);
-        mTextOriginalTitle = findViewById(R.id.tv_original_title);
-        mTextOfficialReleaseDate = findViewById(R.id.tv_release_date);
+        TextView mTextOverview = findViewById(R.id.tv_overview);
+        TextView mTextTitle = findViewById(R.id.tv_title);
+        TextView mTextOriginalLanguage = findViewById(R.id.tv_original_language);
+        TextView mTextOriginalTitle = findViewById(R.id.tv_original_title);
+        TextView mTextOfficialReleaseDate = findViewById(R.id.tv_release_date);
         mTextNoReview = findViewById(R.id.tv_no_review);
         mTextNoTrailer = findViewById(R.id.tv_no_trailer);
-        mRatingBar = findViewById(R.id.ratingBar);
+        RatingBar mRatingBar = findViewById(R.id.ratingBar);
         mRecyclerViewReviews = findViewById(R.id.rv_review);
         mRecyclerViewTrailers = findViewById(R.id.rv_trailer);
 
@@ -102,8 +92,8 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         LinearLayoutManager layoutManager2 = new LinearLayoutManager(this);
         if(sd.isMedium()){
-            Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-            if(display.getRotation() == Surface.ROTATION_90 || display.getRotation() == Surface.ROTATION_270){
+
+            if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             layoutManager2.setOrientation(LinearLayoutManager.VERTICAL);
             }
             else{
@@ -182,7 +172,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
                        makeFavorite(myMovie,true);
                        mImageFavorite.setImageResource(R.mipmap.ic_favorite_colored);
                    }
-                   Log.e(TAG,"Movie id:"+myMovie.getId());
+
                 }
             });
 
@@ -219,7 +209,7 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
         startActivity(Intent.createChooser(watchVideoIntent,getString(R.string.open_with)));
     }
 
-    public class MovieReviews extends AsyncTask<String,Void,String>{
+    class MovieReviews extends AsyncTask<String,Void,String>{
         @Override
         protected String doInBackground(String... args){
             String url_string = args[0];
@@ -275,8 +265,9 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
             mRecyclerViewReviews.setAdapter(mReviewsAdapter);
             mReviewsAdapter.notifyDataSetChanged();
         }
-    };
-    public class MovieTrailers extends AsyncTask<String,Void,String>{
+    }
+
+    class MovieTrailers extends AsyncTask<String,Void,String>{
         @Override
         protected String doInBackground(String... args){
             String url_string = args[0];
@@ -333,5 +324,5 @@ public class DetailsActivity extends AppCompatActivity implements TrailersAdapte
             mRecyclerViewTrailers.setAdapter(mTrailersAdapter);
             mTrailersAdapter.notifyDataSetChanged();
         }
-    };
+    }
 }

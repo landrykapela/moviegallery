@@ -23,8 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -32,13 +30,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Scanner;
 
 import tz.co.neelansoft.cinegallery.library.CustomGridAdapter;
 import tz.co.neelansoft.cinegallery.library.JSONParser;
 import tz.co.neelansoft.cinegallery.library.Movie;
 import tz.co.neelansoft.cinegallery.library.MovieDatabase;
-import tz.co.neelansoft.cinegallery.library.MovieExecutors;
 
 import static tz.co.neelansoft.cinegallery.library.Config.DEFAULT_REQUEST_URL;
 import static tz.co.neelansoft.cinegallery.library.Config.POSTER_BASE_URL;
@@ -50,10 +46,10 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
     private static final String TAG = "MainActivity";
 
     private static CustomGridAdapter mGridAdapter;
-    private static GridView mGridView;
-    private static ProgressBar mProgressBar;
-    private TextView mGridHeading;
-    private static ImageView mImageReload;
+    private GridView mGridView;
+    private ProgressBar mProgressBar;
+    private ImageView mImageReload;
+    private TextView mTextNoData;
     private static int mColumnCount = 2;
     private static List<Movie> mMovies = new ArrayList<>();
     private static boolean success = true;
@@ -69,8 +65,8 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         mGridView = findViewById(R.id.gridview);
 
         mProgressBar = findViewById(R.id.progressBar);
-        mGridHeading = findViewById(R.id.tv_grid_heading);
         mImageReload = findViewById(R.id.iv_reload);
+        mTextNoData = findViewById(R.id.tv_no_data);
 
         mMovieDatabase = MovieDatabase.getDatabaseInstance(this);
 
@@ -80,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements CustomGridAdapter
         mGridAdapter = new CustomGridAdapter(this);
         if(savedInstanceState != null){
             mMovies = savedInstanceState.getParcelableArrayList("movies");
-            mGridHeading.setText(savedInstanceState.getString("heading"));
+            getSupportActionBar().setTitle(savedInstanceState.getString("heading"));
             mGridAdapter.setMovieList(mMovies);
             mGridView.setNumColumns(mColumnCount);
             mGridView.setVerticalSpacing(10);
@@ -109,16 +105,21 @@ Log.e(TAG,"It loaded: "+mMovies.size());
     }
 
     private void reload(String url){
-        new MoviesAsyncTask().execute(url);
-        mImageReload.setVisibility(View.GONE);
-        mGridAdapter.notifyDataSetChanged();
+        if(getSupportActionBar().getTitle().equals(getString(R.string.favorite))){
+            getFavorites();
+        }
+        else {
+            new MoviesAsyncTask().execute(url);
+            mImageReload.setVisibility(View.GONE);
+            mGridAdapter.notifyDataSetChanged();
+        }
     }
     @Override
     public void onSaveInstanceState(Bundle out_bundle){
 
         mMovies = mGridAdapter.getMovies();
         out_bundle.putParcelableArrayList("movies",(ArrayList<Movie>)mMovies);
-        out_bundle.putString("heading",mGridHeading.getText().toString());
+        out_bundle.putString("heading",getSupportActionBar().getTitle().toString());
         super.onSaveInstanceState(out_bundle);
     }
     @Override
@@ -143,7 +144,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
     public boolean onOptionsItemSelected(MenuItem menuItem){
         int selectedItem = menuItem.getItemId();
         StringBuilder stringBuilder = new StringBuilder(STANDARD_REQUEST_URL);
-        String heading = "";
+        String heading;
         switch (selectedItem){
             case R.id.action_favorite:
                 getFavorites();
@@ -178,7 +179,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         }
         new MoviesAsyncTask().execute(stringBuilder.toString());
         mGridAdapter.notifyDataSetChanged();
-        mGridHeading.setText(heading);
+        getSupportActionBar().setTitle(heading);
         return super.onOptionsItemSelected(menuItem);
     }
 
@@ -189,22 +190,26 @@ Log.e(TAG,"It loaded: "+mMovies.size());
             public void onChanged(@Nullable List<Movie> movies) {
                 mGridAdapter.setMovieList(movies);
                 mGridAdapter.notifyDataSetChanged();
-                mGridHeading.setText(R.string.favorite);
+                getSupportActionBar().setTitle(R.string.favorite);
+                if(movies.size() == 0){
+                    mImageReload.setVisibility(View.VISIBLE);
+                    mTextNoData.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
 
 
-    private static void showProgress(){
+    private void showProgress(){
         mProgressBar.setVisibility(View.VISIBLE);
 
     }
-    private static void hideProgress(){
+    private void hideProgress(){
         mProgressBar.setVisibility(View.GONE);
 
     }
 
-    private static void updateUI(List<Movie> movies){
+    private void updateUI(List<Movie> movies){
         mGridAdapter.setMovieList(movies);
         mGridView.setNumColumns(mColumnCount);
         mGridView.setVerticalSpacing(10);
@@ -212,8 +217,9 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         mGridView.setAdapter(mGridAdapter);
         mGridAdapter.notifyDataSetChanged();
         mImageReload.setVisibility(View.GONE);
+        mTextNoData.setVisibility(View.GONE);
     }
-    static class MoviesAsyncTask extends AsyncTask<String,Void,String> {
+    class MoviesAsyncTask extends AsyncTask<String,Void,String> {
         final List<Movie> movies = new ArrayList<>();
         String url_string = "";
     @Override
@@ -306,6 +312,7 @@ Log.e(TAG,"It loaded: "+mMovies.size());
         }
         else{
             mImageReload.setVisibility(View.VISIBLE);
+            mTextNoData.setVisibility(View.VISIBLE);
         }
 
     }

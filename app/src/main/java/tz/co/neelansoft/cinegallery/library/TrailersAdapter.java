@@ -1,6 +1,7 @@
 package tz.co.neelansoft.cinegallery.library;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,9 +16,9 @@ import tz.co.neelansoft.cinegallery.R;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHolder> {
 
-    private Context mContext;
+    private final Context mContext;
     private List<Trailer> mTrailerList = new ArrayList<>();
-    private OnTrailerClickListener mOnTrailerClickListener;
+    private final OnTrailerClickListener mOnTrailerClickListener;
 
     public interface OnTrailerClickListener{
         void onTrailerClick(int positioin);
@@ -31,9 +32,6 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
     public void setTrailerList(List<Trailer> trailers){
         this.mTrailerList = trailers;
     }
-    public List<Trailer> getTrailerList(){
-        return mTrailerList;
-    }
 
     @Override
     public int getItemCount(){
@@ -41,27 +39,28 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder,int position){
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position){
         holder.bind(position);
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         View view = LayoutInflater.from(mContext).inflate(R.layout.trailer_item,parent,false);
         return new ViewHolder(view);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        TextView mTextTrailerName;
-        ImageView mImagePlay;
-        public ViewHolder(View itemView){
+        final TextView mTextTrailerName;
+        final ImageView mImagePlay;
+        ViewHolder(View itemView){
             super(itemView);
             mTextTrailerName = itemView.findViewById(R.id.tv_trailer_name);
             mImagePlay = itemView.findViewById(R.id.iv_play);
             mImagePlay.setOnClickListener(this);
         }
-        public void bind(final int position){
+        void bind(final int position){
 
             mTextTrailerName.setText(mTrailerList.get(position).getName());
         }

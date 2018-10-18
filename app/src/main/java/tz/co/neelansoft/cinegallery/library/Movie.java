@@ -1,7 +1,6 @@
 package tz.co.neelansoft.cinegallery.library;
 
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
