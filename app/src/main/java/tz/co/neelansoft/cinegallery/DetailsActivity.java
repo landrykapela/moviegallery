@@ -2,7 +2,11 @@ package tz.co.neelansoft.cinegallery;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.drm.DrmStore;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,7 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -34,10 +42,15 @@ import tz.co.neelansoft.cinegallery.library.MovieDatabase;
 import tz.co.neelansoft.cinegallery.library.MovieExecutors;
 import tz.co.neelansoft.cinegallery.library.Review;
 import tz.co.neelansoft.cinegallery.library.ReviewsAdapter;
+import tz.co.neelansoft.cinegallery.library.ScreenDimensions;
+import tz.co.neelansoft.cinegallery.library.Trailer;
+import tz.co.neelansoft.cinegallery.library.TrailersAdapter;
 
 import static tz.co.neelansoft.cinegallery.library.Config.API_QUERY;
+import static tz.co.neelansoft.cinegallery.library.Config.MOVIE_URL;
+import static tz.co.neelansoft.cinegallery.library.Config.YOUTUBE_BASE_URL;
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements TrailersAdapter.OnTrailerClickListener{
     private static final String TAG = "DetailsActivity";
     private ImageView mImageBadge;
     private ImageView mImagePoster;
@@ -47,11 +60,16 @@ public class DetailsActivity extends AppCompatActivity {
     private TextView mTextOriginalLanguage;
     private TextView mTextOriginalTitle;
     private TextView mTextOfficialReleaseDate;
+    private TextView mTextNoReview;
+    private TextView mTextNoTrailer;
     private RatingBar mRatingBar;
 
     private RecyclerView mRecyclerViewReviews;
     private ReviewsAdapter mReviewsAdapter;
+    private RecyclerView mRecyclerViewTrailers;
+    private TrailersAdapter mTrailersAdapter;
     List<Review> mReviews = new ArrayList<>();
+    List<Trailer> mTrailers = new ArrayList<>();
 
     private MovieDatabase mDatabase;
     private boolean isFavorite;
@@ -71,14 +89,34 @@ public class DetailsActivity extends AppCompatActivity {
         mTextOriginalLanguage = findViewById(R.id.tv_original_language);
         mTextOriginalTitle = findViewById(R.id.tv_original_title);
         mTextOfficialReleaseDate = findViewById(R.id.tv_release_date);
+        mTextNoReview = findViewById(R.id.tv_no_review);
+        mTextNoTrailer = findViewById(R.id.tv_no_trailer);
         mRatingBar = findViewById(R.id.ratingBar);
-
         mRecyclerViewReviews = findViewById(R.id.rv_review);
+        mRecyclerViewTrailers = findViewById(R.id.rv_trailer);
 
         mReviewsAdapter = new ReviewsAdapter(this,mReviews);
+        mTrailersAdapter = new TrailersAdapter(this,this);
+        ScreenDimensions sd = new ScreenDimensions(this);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager layoutManager2 = new LinearLayoutManager(this);
+        if(sd.isMedium()){
+            Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+            if(display.getRotation() == Surface.ROTATION_90 || display.getRotation() == Surface.ROTATION_270){
+            layoutManager2.setOrientation(LinearLayoutManager.VERTICAL);
+            }
+            else{
+                layoutManager2.setOrientation(LinearLayoutManager.HORIZONTAL);
+            }
+        }
+        else{
+            layoutManager2.setOrientation(LinearLayoutManager.HORIZONTAL);
+            layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        }
         mRecyclerViewReviews.setHasFixedSize(true);
         mRecyclerViewReviews.setLayoutManager(layoutManager);
+        mRecyclerViewTrailers.setLayoutManager(layoutManager2);
 
         mDatabase = MovieDatabase.getDatabaseInstance(this);
 
@@ -148,7 +186,8 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             });
 
-            getMovieReviews(Config.MOVIE_URL+movieId+"/reviews"+API_QUERY);
+            getMovieTrailers(movieId);
+            getMovieReviews(MOVIE_URL+movieId+"/reviews"+API_QUERY);
     }
     private void makeFavorite(final Movie movie, final boolean flag){
         MovieExecutors.getInstance().diskIO().execute(new Runnable() {
@@ -164,11 +203,23 @@ public class DetailsActivity extends AppCompatActivity {
         });
     }
 
+    private void getMovieTrailers(int movie_id){
+        String trailer_link = MOVIE_URL+movie_id+"/videos"+API_QUERY;
+        new MovieTrailers().execute(trailer_link);
+    }
     private void getMovieReviews(String link){
-        new MovieDetails().execute(link);
+        new MovieReviews().execute(link);
     }
 
-    public class MovieDetails extends AsyncTask<String,Void,String>{
+    @Override
+    public void onTrailerClick(int positioin) {
+        Trailer t = mTrailers.get(positioin);
+        String video_link = YOUTUBE_BASE_URL+t.getKey();
+        Intent watchVideoIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(video_link));
+        startActivity(Intent.createChooser(watchVideoIntent,getString(R.string.open_with)));
+    }
+
+    public class MovieReviews extends AsyncTask<String,Void,String>{
         @Override
         protected String doInBackground(String... args){
             String url_string = args[0];
@@ -213,9 +264,74 @@ public class DetailsActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
+            if(mReviews.size() == 0){
+                mTextNoReview.setVisibility(View.VISIBLE);
+            }
+            else{
+
+                mTextNoReview.setVisibility(View.GONE);
+            }
             mReviewsAdapter.setReviewList(mReviews);
             mRecyclerViewReviews.setAdapter(mReviewsAdapter);
             mReviewsAdapter.notifyDataSetChanged();
+        }
+    };
+    public class MovieTrailers extends AsyncTask<String,Void,String>{
+        @Override
+        protected String doInBackground(String... args){
+            String url_string = args[0];
+            try{
+                URL url = new URL(url_string);
+                try {
+                    String json = new JSONParser().getResponseFromHttpUrl(url);
+                    Log.e(TAG,"trailer result: "+json);
+                   try{
+                        JSONObject jo_review = new JSONObject(json);
+                        JSONArray ja = jo_review.getJSONArray("results");
+                        if(ja != null){
+                            for(int i=0;i< ja.length();i++){
+                                JSONObject jo = ja.getJSONObject(i);
+                                String id = jo.getString("id");
+                                String key = jo.getString("key");
+                                String name = jo.getString("name");
+
+                                Trailer t = new Trailer(id,key,name);
+                                mTrailers.add(t);
+                            }
+                        }
+                    }
+                    catch (JSONException e){
+                        e.printStackTrace();
+                        Log.e(TAG,"error in json object",e);
+                        return null;
+                    }
+                    return json;
+                }
+                catch (IOException e){
+                    e.printStackTrace();
+                    Log.e(TAG,"Could not retreive json",e);
+                    return null;
+                }
+            }
+            catch(MalformedURLException e){
+                e.printStackTrace();
+                Log.e(TAG,"URL error");
+                return null;
+            }
+        }
+        @Override
+        protected void onPostExecute(String result){
+            super.onPostExecute(result);
+            if(mTrailers.size() == 0){
+                mTextNoTrailer.setVisibility(View.VISIBLE);
+            }
+            else{
+
+                mTextNoTrailer.setVisibility(View.GONE);
+            }
+            mTrailersAdapter.setTrailerList(mTrailers);
+            mRecyclerViewTrailers.setAdapter(mTrailersAdapter);
+            mTrailersAdapter.notifyDataSetChanged();
         }
     };
 }
